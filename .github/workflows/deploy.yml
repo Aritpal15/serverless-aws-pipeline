@@ -8,10 +8,6 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write # Required for requesting the JWT OIDC token
-  contents: read # Required to checkout repository code
-
 jobs:
   deploy:
     name: "Validate & Deploy Infrastructure"
@@ -28,14 +24,15 @@ jobs:
         with:
           terraform_version: "1.6.0"
 
-      # 3. Configure AWS Credentials using OIDC
+      # 3. Configure AWS Credentials via Access Keys
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      # 4. Initialize Terraform inside the terraform directory
+      # 4. Initialize Terraform
       - name: Terraform Init
         run: terraform init
         working-directory: ./terraform
@@ -55,7 +52,7 @@ jobs:
         run: terraform plan -input=false
         working-directory: ./terraform
 
-      # 8. Apply changes automatically on push to main branch
+      # 8. Apply changes on main branch push
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
