@@ -1,0 +1,9 @@
+# Terraform temporary files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
+
+# Generated zip files
+terraform/lambda_function.zip
