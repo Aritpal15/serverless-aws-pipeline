@@ -46,7 +46,7 @@ data "archive_file" "lambda_zip" {
 # 3. AWS Lambda Function
 resource "aws_lambda_function" "serverless_func" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = var.function_name
+  function_name    = "${var.function_name}-v2"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.11"
