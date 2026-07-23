@@ -59,7 +59,7 @@ resource "aws_lambda_function_url" "func_url" {
   authorization_type = "NONE" # Publicly accessible endpoint
 
   cors {
-    allow_credentials = true
+    allow_credentials = false
     allow_origins     = ["*"]
     allow_methods     = ["GET", "POST"]
     allow_headers     = ["*"]
