@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -12,9 +16,14 @@ provider "aws" {
   region = var.aws_region
 }
 
+# 0. Generate a random suffix to prevent naming collisions in stateless CI/CD
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 # 1. IAM Role for Lambda
 resource "aws_iam_role" "lambda_exec" {
-  name = "${var.function_name}-exec-role-v2"
+  name = "${var.function_name}-role-${random_id.suffix.hex}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -46,7 +55,7 @@ data "archive_file" "lambda_zip" {
 # 3. AWS Lambda Function
 resource "aws_lambda_function" "serverless_func" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = "${var.function_name}-v2"
+  function_name    = "${var.function_name}-${random_id.suffix.hex}"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.11"
