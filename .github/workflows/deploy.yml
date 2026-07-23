@@ -1,0 +1,62 @@
+name: "AWS Serverless Deployment"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  id-token: write # Required for requesting the JWT OIDC token
+  contents: read # Required to checkout repository code
+
+jobs:
+  deploy:
+    name: "Validate & Deploy Infrastructure"
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.0"
+
+      # 3. Configure AWS Credentials using OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ap-south-1
+
+      # 4. Initialize Terraform inside the terraform directory
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+
+      # 5. Check Terraform formatting
+      - name: Terraform Format Check
+        run: terraform fmt -check
+        working-directory: ./terraform
+
+      # 6. Validate Terraform files
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ./terraform
+
+      # 7. Generate execution plan
+      - name: Terraform Plan
+        run: terraform plan -input=false
+        working-directory: ./terraform
+
+      # 8. Apply changes automatically on push to main branch
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
+        working-directory: ./terraform
