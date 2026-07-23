@@ -84,3 +84,10 @@ resource "aws_lambda_permission" "allow_public_func_url" {
   principal              = "*"
   function_url_auth_type = "NONE"
 }
+
+resource "aws_lambda_permission" "allow_public_func_invoke" {
+  statement_id  = "FunctionURLAllowPublicInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.serverless_func.function_name
+  principal     = "*"
+}
