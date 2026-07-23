@@ -18,11 +18,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Setup Terraform CLI
+      # 2. Setup Terraform CLI (Upgraded version to fix expired GPG key)
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.6.0"
+          terraform_version: "1.9.0"
 
       # 3. Configure AWS Credentials via Access Keys
       - name: Configure AWS Credentials
