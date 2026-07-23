@@ -66,3 +66,12 @@ resource "aws_lambda_function_url" "func_url" {
     max_age           = 86400
   }
 }
+
+# 5. Grant Public Invocation Permission to Function URL
+resource "aws_lambda_permission" "allow_public_func_url" {
+  statement_id           = "FunctionURLAllowPublicAccess"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.serverless_func.function_name
+  principal              = "*"
+  function_url_auth_type = "NONE"
+}
